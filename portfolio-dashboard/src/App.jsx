@@ -44,7 +44,7 @@ const saveToStorage = (key, value) => {
 };
 
 // ==================== Modal - 買入（獨立元件）====================
-function BuyModal({ show, onClose, onConfirm }) {
+const BuyModal = React.memo(function BuyModal({ show, onClose, onConfirm }) {
   const symbolRef = React.useRef();
   const priceRef = React.useRef();
   const quantityRef = React.useRef();
@@ -135,9 +135,9 @@ function BuyModal({ show, onClose, onConfirm }) {
       </div>
     </div>
   );
-}
+});
 
-function SellModal({ show, selectedStock, onClose, onConfirm }) {
+const SellModal = React.memo(function SellModal({ show, selectedStock, onClose, onConfirm }) {
   const quantityRef = React.useRef();
   const salePriceRef = React.useRef();
   const feeRef = React.useRef();
@@ -227,9 +227,9 @@ function SellModal({ show, selectedStock, onClose, onConfirm }) {
       </div>
     </div>
   );
-}
+});
 
-function CashModal({ show, onClose, onConfirm }) {
+const CashModal = React.memo(function CashModal({ show, onClose, onConfirm }) {
   const amountRef = React.useRef();
   const remarkRef = React.useRef();
   const [account, setAccount] = React.useState('my');
@@ -308,7 +308,7 @@ function CashModal({ show, onClose, onConfirm }) {
       </div>
     </div>
   );
-}
+});
 
 
 export default function PortfolioDashboard() {
@@ -430,8 +430,8 @@ export default function PortfolioDashboard() {
   }, [holdings]);
 
   // 買入股票
-  const handleBuy = (values) => {
-    const { symbol, price, quantity, fee, account } = values || buyForm;
+  const handleBuy = useCallback((values) => {
+    const { symbol, price, quantity, fee, account } = values || {};
 
     if (!symbol || !price || !quantity) {
       alert('請填入完整的買入資訊');
@@ -468,7 +468,7 @@ export default function PortfolioDashboard() {
         quantity: newQuantity,
         avgCost: newAvgCost,
         currentPrice: numPrice,
-      };
+  }, [holdings, cashBalanceMy, cashBalanceDad, logsMy, logsDad, showBuyModal]);
       setHoldings(updatedHoldings);
     } else {
       // 新增持股
@@ -529,6 +529,9 @@ export default function PortfolioDashboard() {
   };
 
   // 關閉賣出 Modal
+  const handleCloseBuyModal = useCallback(() => setShowBuyModal(false), []);
+  const handleCloseCashModal = useCallback(() => setShowCashModal(false), []);
+
   const closeSellModal = () => {
     setShowSellModal(false);
     setSelectedStock(null);
@@ -541,10 +544,10 @@ export default function PortfolioDashboard() {
   };
 
   // 賣出股票
-  const handleSell = (values) => {
+  const handleSell = useCallback((values) => {
     if (!selectedStock) return;
 
-    const { quantity, salePrice, fee, saleType } = values || sellForm;
+    const { quantity, salePrice, fee, saleType } = values || {};
     const numQuantity = parseFloat(quantity);
     const numSalePrice = parseFloat(salePrice);
     const numFee = parseFloat(fee) || 0;
@@ -601,7 +604,7 @@ export default function PortfolioDashboard() {
       gainLoss: gainLoss,
       gainLossPercent: gainLossPercent,
       account: selectedStock.account,
-    };
+  }, [selectedStock, holdings, cashBalanceMy, cashBalanceDad, logsMy, logsDad, soldRecordsMy, soldRecordsDad]);
 
     if (selectedStock.account === 'my') {
       setSoldRecordsMy([...soldRecordsMy, saleRecord]);
@@ -628,8 +631,8 @@ export default function PortfolioDashboard() {
   };
 
   // 現金操作（存入/提領）
-  const handleCashTransaction = (values) => {
-    const { type, amount, remark, account } = values || cashForm;
+  const handleCashTransaction = useCallback((values) => {
+    const { type, amount, remark, account } = values || {};
     const numAmount = parseFloat(amount);
 
     if (!numAmount || numAmount <= 0) {
@@ -651,7 +654,7 @@ export default function PortfolioDashboard() {
       category: type === 'deposit' ? '存入美金' : '提領美金',
       details: remark || (type === 'deposit' ? '現金存入' : '現金提領'),
       amount: transactionAmount,
-    };
+  }, [cashBalanceMy, cashBalanceDad, logsMy, logsDad]);
 
     if (account === 'my') {
       setLogsMy([...logsMy, log]);
@@ -1494,24 +1497,18 @@ export default function PortfolioDashboard() {
       {/* Modal */}
       <BuyModal
         show={showBuyModal}
-        buyForm={buyForm}
-        setBuyForm={setBuyForm}
-        onClose={() => setShowBuyModal(false)}
+        onClose={handleCloseBuyModal}
         onConfirm={handleBuy}
       />
       <SellModal
         show={showSellModal}
         selectedStock={selectedStock}
-        sellForm={sellForm}
-        setSellForm={setSellForm}
         onClose={closeSellModal}
         onConfirm={handleSell}
       />
       <CashModal
         show={showCashModal}
-        cashForm={cashForm}
-        setCashForm={setCashForm}
-        onClose={() => setShowCashModal(false)}
+        onClose={handleCloseCashModal}
         onConfirm={handleCashTransaction}
       />
     </div>
