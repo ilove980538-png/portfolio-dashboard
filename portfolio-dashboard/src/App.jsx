@@ -43,6 +43,263 @@ const saveToStorage = (key, value) => {
   }
 };
 
+// ==================== Modal - 買入（獨立元件）====================
+function BuyModal({ show, buyForm, setBuyForm, onClose, onConfirm }) {
+  if (!show) return null;
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="backdrop-blur-xl bg-gray-900/95 border border-white/10 rounded-2xl p-8 w-full max-w-md">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white">買入股票</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">股票代號</label>
+            <input
+              type="text"
+              placeholder="例: TSLA"
+              defaultValue={buyForm.symbol}
+              onBlur={(e) => setBuyForm(prev => ({ ...prev, symbol: e.target.value.toUpperCase() }))}
+              onChange={(e) => { e.target.value = e.target.value.toUpperCase(); }}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">買入價格</label>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
+                defaultValue={buyForm.price}
+                onBlur={(e) => setBuyForm(prev => ({ ...prev, price: e.target.value }))}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">股數</label>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="0"
+                defaultValue={buyForm.quantity}
+                onBlur={(e) => setBuyForm(prev => ({ ...prev, quantity: e.target.value }))}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">手續費</label>
+            <input
+              type="text"
+              inputMode="decimal"
+              placeholder="0.00"
+              defaultValue={buyForm.fee}
+              onBlur={(e) => setBuyForm(prev => ({ ...prev, fee: e.target.value }))}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">帳戶</label>
+            <select
+              defaultValue={buyForm.account}
+              onChange={(e) => setBuyForm(prev => ({ ...prev, account: e.target.value }))}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-400/50"
+            >
+              <option value="my">我的帳戶</option>
+              <option value="dad">爸爸的帳戶</option>
+            </select>
+          </div>
+          <button
+            onClick={onConfirm}
+            className="w-full mt-6 bg-emerald-500/80 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-all"
+          >
+            確認買入
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== Modal - 賣出（獨立元件）====================
+function SellModal({ show, selectedStock, sellForm, setSellForm, onClose, onConfirm }) {
+  if (!show || !selectedStock) return null;
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="backdrop-blur-xl bg-gray-900/95 border border-white/10 rounded-2xl p-8 w-full max-w-md">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white">賣出 {selectedStock.symbol}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+            <p className="text-gray-400 text-sm">持股數量</p>
+            <p className="text-2xl font-bold text-white">
+              {selectedStock.quantity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">賣出方式</label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="all"
+                  checked={sellForm.saleType === 'all'}
+                  onChange={(e) => setSellForm(prev => ({ ...prev, saleType: e.target.value, quantity: selectedStock.quantity.toString() }))}
+                  className="w-4 h-4"
+                />
+                <span className="text-gray-300">全數出清</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="partial"
+                  checked={sellForm.saleType === 'partial'}
+                  onChange={(e) => setSellForm(prev => ({ ...prev, saleType: e.target.value, quantity: '' }))}
+                  className="w-4 h-4"
+                />
+                <span className="text-gray-300">部分賣出</span>
+              </label>
+            </div>
+          </div>
+          {sellForm.saleType === 'partial' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">賣出股數</label>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="0"
+                defaultValue={sellForm.quantity}
+                onBlur={(e) => setSellForm(prev => ({ ...prev, quantity: e.target.value }))}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
+              />
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">成交價</label>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
+                defaultValue={sellForm.salePrice}
+                onBlur={(e) => setSellForm(prev => ({ ...prev, salePrice: e.target.value }))}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">賣出手續費</label>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
+                defaultValue={sellForm.fee}
+                onBlur={(e) => setSellForm(prev => ({ ...prev, fee: e.target.value }))}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
+              />
+            </div>
+          </div>
+          <button
+            onClick={onConfirm}
+            className="w-full mt-6 bg-rose-500/80 hover:bg-rose-500 text-white font-bold py-3 rounded-lg transition-all"
+          >
+            確認賣出
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== Modal - 現金操作（獨立元件）====================
+function CashModal({ show, cashForm, setCashForm, onClose, onConfirm }) {
+  if (!show) return null;
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="backdrop-blur-xl bg-gray-900/95 border border-white/10 rounded-2xl p-8 w-full max-w-md">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white">現金操作</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">帳戶</label>
+            <select
+              defaultValue={cashForm.account}
+              onChange={(e) => setCashForm(prev => ({ ...prev, account: e.target.value }))}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400/50"
+            >
+              <option value="my">我的帳戶</option>
+              <option value="dad">爸爸的帳戶</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">操作類型</label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="deposit"
+                  checked={cashForm.type === 'deposit'}
+                  onChange={(e) => setCashForm(prev => ({ ...prev, type: e.target.value }))}
+                  className="w-4 h-4"
+                />
+                <span className="text-gray-300">存入</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="withdraw"
+                  checked={cashForm.type === 'withdraw'}
+                  onChange={(e) => setCashForm(prev => ({ ...prev, type: e.target.value }))}
+                  className="w-4 h-4"
+                />
+                <span className="text-gray-300">提領</span>
+              </label>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">金額</label>
+            <input
+              type="text"
+              inputMode="decimal"
+              placeholder="0.00"
+              defaultValue={cashForm.amount}
+              onBlur={(e) => setCashForm(prev => ({ ...prev, amount: e.target.value }))}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400/50"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">備註</label>
+            <input
+              type="text"
+              placeholder="選填"
+              defaultValue={cashForm.remark}
+              onBlur={(e) => setCashForm(prev => ({ ...prev, remark: e.target.value }))}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400/50"
+            />
+          </div>
+          <button
+            onClick={onConfirm}
+            className="w-full mt-6 bg-blue-500/80 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all"
+          >
+            確認
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ==================== 主應用 ====================
 export default function PortfolioDashboard() {
   // 狀態管理
@@ -584,348 +841,6 @@ export default function PortfolioDashboard() {
               )}
             </tbody>
           </table>
-        </div>
-      </div>
-    );
-  };
-
-  // ==================== Modal - 買入 ====================
-
-  const BuyModal = () => {
-    if (!showBuyModal) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="backdrop-blur-xl bg-gray-900/95 border border-white/10 rounded-2xl p-8 w-full max-w-md">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">買入股票</h2>
-            <button
-              onClick={() => setShowBuyModal(false)}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                股票代號
-              </label>
-              <input
-                type="text"
-                placeholder="例: TSLA"
-                value={buyForm.symbol}
-                onChange={(e) =>
-                  setBuyForm(prev => ({ ...prev, symbol: e.target.value.toUpperCase() }))
-                }
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  買入價格
-                </label>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  step="0.01"
-                  value={buyForm.price}
-                  onChange={(e) => setBuyForm(prev => ({ ...prev, price: e.target.value }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  股數
-                </label>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  placeholder="0"
-                  step="0.01"
-                  value={buyForm.quantity}
-                  onChange={(e) => setBuyForm(prev => ({ ...prev, quantity: e.target.value }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                手續費
-              </label>
-              <input
-                type="number"
-                  inputMode="decimal"
-                placeholder="0.00"
-                step="0.01"
-                value={buyForm.fee}
-                onChange={(e) => setBuyForm(prev => ({ ...prev, fee: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                帳戶
-              </label>
-              <select
-                value={buyForm.account}
-                onChange={(e) => setBuyForm(prev => ({ ...prev, account: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-400/50"
-              >
-                <option value="my">我的帳戶</option>
-                <option value="dad">爸爸的帳戶</option>
-              </select>
-            </div>
-
-            <button
-              onClick={handleBuy}
-              className="w-full mt-6 bg-emerald-500/80 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-all"
-            >
-              確認買入
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // ==================== Modal - 賣出 ====================
-
-  const SellModal = () => {
-    if (!showSellModal || !selectedStock) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="backdrop-blur-xl bg-gray-900/95 border border-white/10 rounded-2xl p-8 w-full max-w-md">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">
-              賣出 {selectedStock.symbol}
-            </h2>
-            <button
-              onClick={closeSellModal}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-              <p className="text-gray-400 text-sm">持股數量</p>
-              <p className="text-2xl font-bold text-white">
-                {selectedStock.quantity.toLocaleString('en-US', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                賣出方式
-              </label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    value="all"
-                    checked={sellForm.saleType === 'all'}
-                    onChange={(e) =>
-                      setSellForm({
-                        ...sellForm,
-                        saleType: e.target.value,
-                        quantity: selectedStock.quantity.toString(),
-                      })
-                    }
-                    className="w-4 h-4"
-                  />
-                  <span className="text-gray-300">全數出清</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    value="partial"
-                    checked={sellForm.saleType === 'partial'}
-                    onChange={(e) =>
-                      setSellForm({
-                        ...sellForm,
-                        saleType: e.target.value,
-                        quantity: '',
-                      })
-                    }
-                    className="w-4 h-4"
-                  />
-                  <span className="text-gray-300">部分賣出</span>
-                </label>
-              </div>
-            </div>
-
-            {sellForm.saleType === 'partial' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  賣出股數
-                </label>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  placeholder="0"
-                  step="0.01"
-                  value={sellForm.quantity}
-                  onChange={(e) => setSellForm(prev => ({ ...prev, quantity: e.target.value }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
-                />
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  成交價
-                </label>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  step="0.01"
-                  value={sellForm.salePrice}
-                  onChange={(e) => setSellForm(prev => ({ ...prev, salePrice: e.target.value }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  賣出手續費
-                </label>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  step="0.01"
-                  value={sellForm.fee}
-                  onChange={(e) => setSellForm(prev => ({ ...prev, fee: e.target.value }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={handleSell}
-              className="w-full mt-6 bg-rose-500/80 hover:bg-rose-500 text-white font-bold py-3 rounded-lg transition-all"
-            >
-              確認賣出
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // ==================== Modal - 現金操作 ====================
-
-  const CashModal = () => {
-    if (!showCashModal) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="backdrop-blur-xl bg-gray-900/95 border border-white/10 rounded-2xl p-8 w-full max-w-md">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">現金操作</h2>
-            <button
-              onClick={() => setShowCashModal(false)}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                帳戶
-              </label>
-              <select
-                value={cashForm.account}
-                onChange={(e) => setCashForm(prev => ({ ...prev, account: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400/50"
-              >
-                <option value="my">我的帳戶</option>
-                <option value="dad">爸爸的帳戶</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                操作類型
-              </label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    value="deposit"
-                    checked={cashForm.type === 'deposit'}
-                    onChange={(e) =>
-                      setCashForm(prev => ({ ...prev, type: e.target.value }))
-                    }
-                    className="w-4 h-4"
-                  />
-                  <span className="text-gray-300">存入</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    value="withdraw"
-                    checked={cashForm.type === 'withdraw'}
-                    onChange={(e) =>
-                      setCashForm(prev => ({ ...prev, type: e.target.value }))
-                    }
-                    className="w-4 h-4"
-                  />
-                  <span className="text-gray-300">提領</span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                金額
-              </label>
-              <input
-                type="number"
-                  inputMode="decimal"
-                placeholder="0.00"
-                step="0.01"
-                value={cashForm.amount}
-                onChange={(e) => setCashForm(prev => ({ ...prev, amount: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400/50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                備註
-              </label>
-              <input
-                type="text"
-                placeholder="選填"
-                value={cashForm.remark}
-                onChange={(e) => setCashForm(prev => ({ ...prev, remark: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400/50"
-              />
-            </div>
-
-            <button
-              onClick={handleCashTransaction}
-              className="w-full mt-6 bg-blue-500/80 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all"
-            >
-              確認
-            </button>
-          </div>
         </div>
       </div>
     );
@@ -1567,9 +1482,28 @@ export default function PortfolioDashboard() {
       </main>
 
       {/* Modal */}
-      {BuyModal()}
-      {SellModal()}
-      {CashModal()}
+      <BuyModal
+        show={showBuyModal}
+        buyForm={buyForm}
+        setBuyForm={setBuyForm}
+        onClose={() => setShowBuyModal(false)}
+        onConfirm={handleBuy}
+      />
+      <SellModal
+        show={showSellModal}
+        selectedStock={selectedStock}
+        sellForm={sellForm}
+        setSellForm={setSellForm}
+        onClose={closeSellModal}
+        onConfirm={handleSell}
+      />
+      <CashModal
+        show={showCashModal}
+        cashForm={cashForm}
+        setCashForm={setCashForm}
+        onClose={() => setShowCashModal(false)}
+        onConfirm={handleCashTransaction}
+      />
     </div>
   );
 }
