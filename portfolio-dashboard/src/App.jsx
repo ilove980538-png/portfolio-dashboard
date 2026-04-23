@@ -617,7 +617,7 @@ export default function PortfolioDashboard() {
                 placeholder="例: TSLA"
                 value={buyForm.symbol}
                 onChange={(e) =>
-                  setBuyForm({ ...buyForm, symbol: e.target.value.toUpperCase() })
+                  setBuyForm(prev => ({ ...prev, symbol: e.target.value.toUpperCase() }))
                 }
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
               />
@@ -630,10 +630,11 @@ export default function PortfolioDashboard() {
                 </label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   placeholder="0.00"
                   step="0.01"
                   value={buyForm.price}
-                  onChange={(e) => setBuyForm({ ...buyForm, price: e.target.value })}
+                  onChange={(e) => setBuyForm(prev => ({ ...prev, price: e.target.value }))}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
                 />
               </div>
@@ -643,10 +644,11 @@ export default function PortfolioDashboard() {
                 </label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   placeholder="0"
                   step="0.01"
                   value={buyForm.quantity}
-                  onChange={(e) => setBuyForm({ ...buyForm, quantity: e.target.value })}
+                  onChange={(e) => setBuyForm(prev => ({ ...prev, quantity: e.target.value }))}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
                 />
               </div>
@@ -658,10 +660,11 @@ export default function PortfolioDashboard() {
               </label>
               <input
                 type="number"
+                  inputMode="decimal"
                 placeholder="0.00"
                 step="0.01"
                 value={buyForm.fee}
-                onChange={(e) => setBuyForm({ ...buyForm, fee: e.target.value })}
+                onChange={(e) => setBuyForm(prev => ({ ...prev, fee: e.target.value }))}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
               />
             </div>
@@ -672,7 +675,7 @@ export default function PortfolioDashboard() {
               </label>
               <select
                 value={buyForm.account}
-                onChange={(e) => setBuyForm({ ...buyForm, account: e.target.value })}
+                onChange={(e) => setBuyForm(prev => ({ ...prev, account: e.target.value }))}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-400/50"
               >
                 <option value="my">我的帳戶</option>
@@ -770,10 +773,11 @@ export default function PortfolioDashboard() {
                 </label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   placeholder="0"
                   step="0.01"
                   value={sellForm.quantity}
-                  onChange={(e) => setSellForm({ ...sellForm, quantity: e.target.value })}
+                  onChange={(e) => setSellForm(prev => ({ ...prev, quantity: e.target.value }))}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
                 />
               </div>
@@ -786,10 +790,11 @@ export default function PortfolioDashboard() {
                 </label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   placeholder="0.00"
                   step="0.01"
                   value={sellForm.salePrice}
-                  onChange={(e) => setSellForm({ ...sellForm, salePrice: e.target.value })}
+                  onChange={(e) => setSellForm(prev => ({ ...prev, salePrice: e.target.value }))}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
                 />
               </div>
@@ -799,10 +804,11 @@ export default function PortfolioDashboard() {
                 </label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   placeholder="0.00"
                   step="0.01"
                   value={sellForm.fee}
-                  onChange={(e) => setSellForm({ ...sellForm, fee: e.target.value })}
+                  onChange={(e) => setSellForm(prev => ({ ...prev, fee: e.target.value }))}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
                 />
               </div>
@@ -845,7 +851,7 @@ export default function PortfolioDashboard() {
               </label>
               <select
                 value={cashForm.account}
-                onChange={(e) => setCashForm({ ...cashForm, account: e.target.value })}
+                onChange={(e) => setCashForm(prev => ({ ...prev, account: e.target.value }))}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400/50"
               >
                 <option value="my">我的帳戶</option>
@@ -864,7 +870,7 @@ export default function PortfolioDashboard() {
                     value="deposit"
                     checked={cashForm.type === 'deposit'}
                     onChange={(e) =>
-                      setCashForm({ ...cashForm, type: e.target.value })
+                      setCashForm(prev => ({ ...prev, type: e.target.value }))
                     }
                     className="w-4 h-4"
                   />
@@ -876,7 +882,7 @@ export default function PortfolioDashboard() {
                     value="withdraw"
                     checked={cashForm.type === 'withdraw'}
                     onChange={(e) =>
-                      setCashForm({ ...cashForm, type: e.target.value })
+                      setCashForm(prev => ({ ...prev, type: e.target.value }))
                     }
                     className="w-4 h-4"
                   />
@@ -891,10 +897,11 @@ export default function PortfolioDashboard() {
               </label>
               <input
                 type="number"
+                  inputMode="decimal"
                 placeholder="0.00"
                 step="0.01"
                 value={cashForm.amount}
-                onChange={(e) => setCashForm({ ...cashForm, amount: e.target.value })}
+                onChange={(e) => setCashForm(prev => ({ ...prev, amount: e.target.value }))}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400/50"
               />
             </div>
@@ -907,7 +914,7 @@ export default function PortfolioDashboard() {
                 type="text"
                 placeholder="選填"
                 value={cashForm.remark}
-                onChange={(e) => setCashForm({ ...cashForm, remark: e.target.value })}
+                onChange={(e) => setCashForm(prev => ({ ...prev, remark: e.target.value }))}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400/50"
               />
             </div>
@@ -1560,9 +1567,9 @@ export default function PortfolioDashboard() {
       </main>
 
       {/* Modal */}
-      <BuyModal />
-      <SellModal />
-      <CashModal />
+      {BuyModal()}
+      {SellModal()}
+      {CashModal()}
     </div>
   );
 }
