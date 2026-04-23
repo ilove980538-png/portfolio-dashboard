@@ -45,15 +45,26 @@ const saveToStorage = (key, value) => {
 
 // ==================== Modal - 買入（獨立元件）====================
 const BuyModal = React.memo(function BuyModal({ show, onClose, onConfirm }) {
+  const dialogRef = React.useRef();
   const symbolRef = React.useRef();
   const priceRef = React.useRef();
   const quantityRef = React.useRef();
   const feeRef = React.useRef();
   const accountRef = React.useRef();
 
+  React.useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (show) {
+      dialog.showModal();
+    } else {
+      dialog.close();
+    }
+  }, [show]);
+
   const handleConfirm = () => {
     onConfirm({
-      symbol: symbolRef.current?.value || '',
+      symbol: (symbolRef.current?.value || '').toUpperCase(),
       price: priceRef.current?.value || '',
       quantity: quantityRef.current?.value || '',
       fee: feeRef.current?.value || '0.99',
@@ -61,87 +72,74 @@ const BuyModal = React.memo(function BuyModal({ show, onClose, onConfirm }) {
     });
   };
 
-  if (!show) return null;
+  const inputCls = "w-full rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none border border-white/10 focus:border-emerald-400/50";
+  const inputStyle = { background: 'rgba(255,255,255,0.05)', fontSize: '16px' };
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="backdrop-blur-xl bg-gray-900/95 border border-white/10 rounded-2xl p-8 w-full max-w-md">
+    <dialog
+      ref={dialogRef}
+      onClose={onClose}
+      style={{ background: 'transparent', border: 'none', padding: 0, maxWidth: '100vw', width: '100%' }}
+    >
+      <div style={{ background: 'rgba(17,24,39,0.98)', borderRadius: '16px', padding: '32px', maxWidth: '448px', margin: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white">買入股票</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
             <X className="w-6 h-6" />
           </button>
         </div>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">股票代號</label>
-            <input
-              ref={symbolRef}
-              type="text"
-              placeholder="例: TSLA"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
-              style={{textTransform:'uppercase'}}
-            />
+            <input ref={symbolRef} type="text" placeholder="例: TSLA" className={inputCls} style={{...inputStyle, textTransform:'uppercase'}} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">買入價格</label>
-              <input
-                ref={priceRef}
-                type="text"
-                inputMode="decimal"
-                placeholder="0.00"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
-              />
+              <input ref={priceRef} type="text" inputMode="decimal" placeholder="0.00" className={inputCls} style={inputStyle} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">股數</label>
-              <input
-                ref={quantityRef}
-                type="text"
-                inputMode="decimal"
-                placeholder="0"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
-              />
+              <input ref={quantityRef} type="text" inputMode="decimal" placeholder="0" className={inputCls} style={inputStyle} />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">手續費</label>
-            <input
-              ref={feeRef}
-              type="text"
-              inputMode="decimal"
-              placeholder="0.99"
-              defaultValue="0.99"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400/50"
-            />
+            <input ref={feeRef} type="text" inputMode="decimal" placeholder="0.99" defaultValue="0.99" className={inputCls} style={inputStyle} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">帳戶</label>
-            <select
-              ref={accountRef}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-400/50"
-            >
+            <select ref={accountRef} className={inputCls} style={inputStyle}>
               <option value="my">我的帳戶</option>
               <option value="dad">爸爸的帳戶</option>
             </select>
           </div>
-          <button
-            onClick={handleConfirm}
-            className="w-full mt-6 bg-emerald-500/80 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-all"
-          >
+          <button onClick={handleConfirm} className="w-full mt-6 bg-emerald-500/80 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-all">
             確認買入
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 });
 
 const SellModal = React.memo(function SellModal({ show, selectedStock, onClose, onConfirm }) {
+  const dialogRef = React.useRef();
   const quantityRef = React.useRef();
   const salePriceRef = React.useRef();
   const feeRef = React.useRef();
   const [saleType, setSaleType] = React.useState('partial');
+
+  React.useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (show) {
+      dialog.showModal();
+      setSaleType('partial');
+    } else {
+      dialog.close();
+    }
+  }, [show]);
 
   const handleConfirm = () => {
     onConfirm({
@@ -152,21 +150,21 @@ const SellModal = React.memo(function SellModal({ show, selectedStock, onClose, 
     });
   };
 
-  if (!show || !selectedStock) return null;
+  const inputCls = "w-full rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none border border-white/10 focus:border-rose-400/50";
+  const inputStyle = { background: 'rgba(255,255,255,0.05)', fontSize: '16px' };
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="backdrop-blur-xl bg-gray-900/95 border border-white/10 rounded-2xl p-8 w-full max-w-md">
+    <dialog ref={dialogRef} onClose={onClose} style={{ background: 'transparent', border: 'none', padding: 0, maxWidth: '100vw', width: '100%' }}>
+      <div style={{ background: 'rgba(17,24,39,0.98)', borderRadius: '16px', padding: '32px', maxWidth: '448px', margin: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">賣出 {selectedStock.symbol}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-            <X className="w-6 h-6" />
-          </button>
+          <h2 className="text-2xl font-bold text-white">賣出 {selectedStock?.symbol}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
         </div>
         <div className="space-y-4">
-          <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+          <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
             <p className="text-gray-400 text-sm">持股數量</p>
             <p className="text-2xl font-bold text-white">
-              {selectedStock.quantity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {selectedStock?.quantity?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </div>
           <div>
@@ -185,55 +183,44 @@ const SellModal = React.memo(function SellModal({ show, selectedStock, onClose, 
           {saleType === 'partial' && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">賣出股數</label>
-              <input
-                ref={quantityRef}
-                type="text"
-                inputMode="decimal"
-                placeholder="0"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
-              />
+              <input ref={quantityRef} type="text" inputMode="decimal" placeholder="0" className={inputCls} style={inputStyle} />
             </div>
           )}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">成交價</label>
-              <input
-                ref={salePriceRef}
-                type="text"
-                inputMode="decimal"
-                placeholder="0.00"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
-              />
+              <input ref={salePriceRef} type="text" inputMode="decimal" placeholder="0.00" className={inputCls} style={inputStyle} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">賣出手續費</label>
-              <input
-                ref={feeRef}
-                type="text"
-                inputMode="decimal"
-                placeholder="0.99"
-                defaultValue="0.99"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-rose-400/50"
-              />
+              <input ref={feeRef} type="text" inputMode="decimal" placeholder="0.99" defaultValue="0.99" className={inputCls} style={inputStyle} />
             </div>
           </div>
-          <button
-            onClick={handleConfirm}
-            className="w-full mt-6 bg-rose-500/80 hover:bg-rose-500 text-white font-bold py-3 rounded-lg transition-all"
-          >
+          <button onClick={handleConfirm} className="w-full mt-6 bg-rose-500/80 hover:bg-rose-500 text-white font-bold py-3 rounded-lg transition-all">
             確認賣出
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 });
 
 const CashModal = React.memo(function CashModal({ show, onClose, onConfirm }) {
+  const dialogRef = React.useRef();
   const amountRef = React.useRef();
   const remarkRef = React.useRef();
   const [account, setAccount] = React.useState('my');
   const [type, setType] = React.useState('deposit');
+
+  React.useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (show) {
+      dialog.showModal();
+    } else {
+      dialog.close();
+    }
+  }, [show]);
 
   const handleConfirm = () => {
     onConfirm({
@@ -244,24 +231,20 @@ const CashModal = React.memo(function CashModal({ show, onClose, onConfirm }) {
     });
   };
 
-  if (!show) return null;
+  const inputCls = "w-full rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none border border-white/10 focus:border-blue-400/50";
+  const inputStyle = { background: 'rgba(255,255,255,0.05)', fontSize: '16px' };
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="backdrop-blur-xl bg-gray-900/95 border border-white/10 rounded-2xl p-8 w-full max-w-md">
+    <dialog ref={dialogRef} onClose={onClose} style={{ background: 'transparent', border: 'none', padding: 0, maxWidth: '100vw', width: '100%' }}>
+      <div style={{ background: 'rgba(17,24,39,0.98)', borderRadius: '16px', padding: '32px', maxWidth: '448px', margin: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white">現金操作</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-            <X className="w-6 h-6" />
-          </button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
         </div>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">帳戶</label>
-            <select
-              value={account}
-              onChange={(e) => setAccount(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-400/50"
-            >
+            <select value={account} onChange={(e) => setAccount(e.target.value)} className={inputCls} style={inputStyle}>
               <option value="my">我的帳戶</option>
               <option value="dad">爸爸的帳戶</option>
             </select>
@@ -281,35 +264,20 @@ const CashModal = React.memo(function CashModal({ show, onClose, onConfirm }) {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">金額</label>
-            <input
-              ref={amountRef}
-              type="text"
-              inputMode="decimal"
-              placeholder="0.00"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400/50"
-            />
+            <input ref={amountRef} type="text" inputMode="decimal" placeholder="0.00" className={inputCls} style={inputStyle} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">備註</label>
-            <input
-              ref={remarkRef}
-              type="text"
-              placeholder="選填"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400/50"
-            />
+            <input ref={remarkRef} type="text" placeholder="選填" className={inputCls} style={inputStyle} />
           </div>
-          <button
-            onClick={handleConfirm}
-            className="w-full mt-6 bg-blue-500/80 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all"
-          >
+          <button onClick={handleConfirm} className="w-full mt-6 bg-blue-500/80 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all">
             確認
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 });
-
 
 export default function PortfolioDashboard() {
   // 狀態管理
